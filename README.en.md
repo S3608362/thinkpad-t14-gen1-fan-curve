@@ -51,7 +51,7 @@ Under a light `glxgears` load this low-power dGPU only reached 49°C and did not
 
 | level | Measured RPM |
 |---|---|
-| 1 | ~2868 RPM |
+| 1 | ~2868–2900 RPM |
 | 2 | ~3293 RPM |
 | 3 | ~3405 RPM |
 | 4 | ~3512 RPM |
@@ -60,6 +60,8 @@ Under a light `glxgears` load this low-power dGPU only reached 49°C and did not
 | 7 | ~4970 RPM |
 
 Levels 2/3/4 are nearly identical, and 6/7 are saturated, so the script only uses **1 / 2 / 5 / 6 / 7**.
+
+> Reading note: during `auto` spin-down the tach passes through ~2300 RPM; that is a transient, not level 1. Some tools briefly report 65535 RPM when the fan starts — a tach overflow, ignore it. Level 1 steady state is ~2868–2900 RPM.
 
 ### Control curve
 
