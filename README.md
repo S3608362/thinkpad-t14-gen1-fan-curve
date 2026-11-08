@@ -178,6 +178,33 @@ sudo reboot
 - **传感器改名/换位置**：脚本按 hwmon 名称（`coretemp`、`thinkpad`）和标签（`Package id 0`、`GPU`）查找；启动日志会打印实际路径。
 - **出问题时**：`echo 'level auto' | sudo tee /proc/acpi/ibm/fan`，然后查看 `journalctl -t thinkfan-lite`。
 
+## 其他 ThinkPad 能用吗？
+
+**控制框架可以复用，但参数和传感器假设不能照搬。**
+
+可复用的部分：
+
+- `thinkpad_acpi` 的 `fan_control=1` 和 `/proc/acpi/ibm/fan` 接口；
+- 按温度切档、watchdog、systemd 守护；
+- hwmon 按名称查找（`coretemp` / `thinkpad`）。
+
+必须逐机验证的部分：
+
+- **level 到转速的映射**：不同机型/BIOS/EC 完全不同，先跑 `measure-levels.sh`；
+- **EC 是否接受手动档位**：有些机型写入 level 后转速不变，那就不能用；
+- **CPU 传感器**：Intel 是 `coretemp` 的 `Package id 0`；AMD 是 `k10temp`，脚本需要改；
+- **GPU 传感器**：`thinkpad/temp2_input` 的 `GPU` 标签只在带独显的机型上存在；没有独显或标签不同，脚本会退回 CPU；
+- **风扇数量**：双风扇机型（P 系列、X1 Extreme 等）可能需要同时处理 `fan1` / `fan2`；
+- **温度阈值**：48/56/68/80/88 只是这台 T14 Gen 1 的起点，换机型要重新跑负载测试。
+
+使用前至少做：
+
+1. `cat /sys/module/thinkpad_acpi/parameters/fan_control` → 必须是 `Y`；
+2. `cat /proc/acpi/ibm/fan` → 要有 `level` / `watchdog` 命令；
+3. `sudo ./measure-levels.sh` → level 1–7 转速必须真的变化；
+4. 检查 `temp*_label`，确认 CPU/GPU 传感器对得上；
+5. 先小负载测试，再决定是否长期使用。
+
 ## 已验证范围
 
 仅 **ThinkPad T14 Gen 1（Intel 平台）**。不同 BIOS/EC 版本的档位映射可能不同；换机型或升级固件后请先运行 `measure-levels.sh`，不要直接套用阈值。

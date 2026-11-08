@@ -31,7 +31,7 @@ find_temp_by_label() {
 CORE=$(find_hwmon coretemp) || { echo "coretemp hwmon not found" >&2; exit 1; }
 TP=$(find_hwmon thinkpad) || { echo "thinkpad hwmon not found" >&2; exit 1; }
 TEMP_CPU=$(find_temp_by_label "$CORE" "Package id 0") || TEMP_CPU="$CORE/temp1_input"
-TEMP_GPU=$(find_temp_by_label "$TP" "GPU") || TEMP_GPU="$TP/temp2_input"
+TEMP_GPU=$(find_temp_by_label "$TP" "GPU") || TEMP_GPU=""
 
 # 实测：1=2868, 2=3293, 3=3405, 4=3512, 5=4518, 6=4987, 7=4970 RPM
 # 2/3/4 几乎一样，6/7 饱和，所以只用 1/2/5/6/7。

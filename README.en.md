@@ -178,6 +178,33 @@ sudo reboot
 - **Sensor rename/move**: the script finds hwmon devices by name (`coretemp`, `thinkpad`) and temperatures by label (`Package id 0`, `GPU`); the startup log prints the actual paths.
 - **If something breaks**: `echo 'level auto' | sudo tee /proc/acpi/ibm/fan`, then check `journalctl -t thinkfan-lite`.
 
+## Will it work on other ThinkPads?
+
+**The control framework is reusable, but the parameters and sensor assumptions are not.**
+
+Portable parts:
+
+- `thinkpad_acpi` with `fan_control=1` and the `/proc/acpi/ibm/fan` interface;
+- temperature-based level switching, watchdog, systemd service;
+- hwmon lookup by name (`coretemp` / `thinkpad`).
+
+Must be verified per machine:
+
+- **level-to-RPM mapping**: completely different across models/BIOS/EC; run `measure-levels.sh` first;
+- **whether the EC accepts manual levels**: on some models the RPM does not change at all;
+- **CPU sensor**: Intel uses `coretemp` / `Package id 0`; AMD uses `k10temp` and the script must be adapted;
+- **GPU sensor**: the `GPU` label on `thinkpad/temp2_input` only exists on dGPU models; without it the script falls back to CPU;
+- **number of fans**: dual-fan models (P series, X1 Extreme, etc.) may need `fan1` / `fan2` handling;
+- **temperature thresholds**: 48/56/68/80/88 are only a starting point for this T14 Gen 1.
+
+Minimum checks before use:
+
+1. `cat /sys/module/thinkpad_acpi/parameters/fan_control` → must be `Y`;
+2. `cat /proc/acpi/ibm/fan` → must expose `level` / `watchdog`;
+3. `sudo ./measure-levels.sh` → level 1–7 must actually change the RPM;
+4. inspect `temp*_label` and confirm the CPU/GPU sensors;
+5. test under a small load before using it long-term.
+
 ## Tested on
 
 **ThinkPad T14 Gen 1 (Intel) only.** Fan-level mapping may differ across BIOS/EC versions; after changing models or updating firmware, run `measure-levels.sh` first and do not copy the thresholds blindly.
