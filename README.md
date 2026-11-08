@@ -2,6 +2,11 @@
 
 > **English TL;DR** — On a ThinkPad T14 Gen 1 (Intel), the EC fan curve is driven by a slow sensor and stays at 0 RPM until the CPU package reaches ~95°C. Linux exposes no Fan cooling device, and `thermald` refuses to run on this platform (`dytc_lapmode`). This repo contains a small systemd daemon that drives `/proc/acpi/ibm/fan` from `coretemp`, with hysteresis, a 10s watchdog and a 90°C fail-safe. **Tested on T14 Gen 1 only.** Manual fan control bypasses the EC curve — read the warnings before use.
 
+> [!WARNING]
+> **不要轻信 fork 仓库。** 只以本仓库（`S3608362/thinkpad-t14-gen1-fan-curve`）的代码为准。fork 可能被修改并加入恶意代码；如果你从 fork 安装，请先逐行审查脚本，不要直接 `sudo` 运行。本项目没有 `curl | bash` 安装方式。
+
+> English version: [README.en.md](README.en.md)
+
 ## 症状
 
 - 轻负载升温后，风扇长时间保持 0 RPM；
@@ -73,6 +78,8 @@
 
 ## 文件
 
+- `README.md`：中文版；
+- `README.en.md`：英文版；
 - `thinkfan-lite.sh`：守护脚本；
 - `thinkfan-lite.service`：systemd 单元；
 - `measure-levels.sh`：实测 level 1–7 对应转速。
