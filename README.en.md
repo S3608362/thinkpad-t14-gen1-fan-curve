@@ -168,6 +168,14 @@ sudo update-initramfs -u
 sudo reboot
 ```
 
+## After system or driver upgrades
+
+- **Kernel upgrade**: `/etc/modprobe.d/thinkpad_acpi.conf` and the systemd unit persist. After reboot, verify `fan_control=Y` and check the sensor paths in `journalctl -t thinkfan-lite`.
+- **BIOS/EC update**: the level-to-RPM mapping may change. Re-run `sudo ./measure-levels.sh`; if the RPM table changed, update `ON` / `OFF` accordingly.
+- **NVIDIA driver update**: the script reads the EC `thinkpad/temp2_input`, not `nvidia-smi`, so driver updates normally do not affect it. Just confirm the sensor still exists.
+- **Sensor rename/move**: the script finds hwmon devices by name (`coretemp`, `thinkpad`) and temperatures by label (`Package id 0`, `GPU`); the startup log prints the actual paths.
+- **If something breaks**: `echo 'level auto' | sudo tee /proc/acpi/ibm/fan`, then check `journalctl -t thinkfan-lite`.
+
 ## Tested on
 
 **ThinkPad T14 Gen 1 (Intel) only.** Fan-level mapping may differ across BIOS/EC versions; after changing models or updating firmware, run `measure-levels.sh` first and do not copy the thresholds blindly.

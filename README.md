@@ -168,6 +168,14 @@ sudo update-initramfs -u
 sudo reboot
 ```
 
+## 系统/驱动升级后
+
+- **内核升级**：`/etc/modprobe.d/thinkpad_acpi.conf` 和 systemd 服务会保留。重启后确认 `fan_control=Y`，再看 `journalctl -t thinkfan-lite` 里的传感器路径。
+- **BIOS/EC 升级**：档位到转速的映射可能改变。重新运行 `sudo ./measure-levels.sh`；如果 RPM 表变化，按新表调整 `ON` / `OFF`。
+- **NVIDIA 驱动升级**：脚本读 EC 的 `thinkpad/temp2_input`，不依赖 `nvidia-smi`，一般不受影响；确认该传感器仍然存在即可。
+- **传感器改名/换位置**：脚本按 hwmon 名称（`coretemp`、`thinkpad`）和标签（`Package id 0`、`GPU`）查找；启动日志会打印实际路径。
+- **出问题时**：`echo 'level auto' | sudo tee /proc/acpi/ibm/fan`，然后查看 `journalctl -t thinkfan-lite`。
+
 ## 已验证范围
 
 仅 **ThinkPad T14 Gen 1（Intel 平台）**。不同 BIOS/EC 版本的档位映射可能不同；换机型或升级固件后请先运行 `measure-levels.sh`，不要直接套用阈值。
