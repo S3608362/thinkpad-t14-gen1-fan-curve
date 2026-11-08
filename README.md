@@ -36,7 +36,16 @@
 
 ## 方案
 
-打开 `thinkpad_acpi` 的手动风扇控制，用一个小的 systemd 守护脚本按 `coretemp` 温度写 `/proc/acpi/ibm/fan` 的档位。
+打开 `thinkpad_acpi` 的手动风扇控制，用一个小的 systemd 守护脚本按 **CPU 封装与独显温度中的较大值** 写 `/proc/acpi/ibm/fan` 的档位。
+
+### 双显卡怎么算
+
+- **核显**：与 CPU 同 die，`coretemp/temp1_input` 已经覆盖；
+- **独显**：使用 EC 的 `thinkpad/temp2_input`（实测与 `nvidia-smi` 读数完全一致）；
+- 脚本取两者最大值，所以无论 CPU 先热还是独显先热，风扇都会按更热的那个升档；
+- 没有独显或独显关闭时，`temp2` 读数为 0/无效，脚本自动忽略，只用 CPU。
+
+轻量 `glxgears` 独显负载下，这张低功耗独显只到 49°C，未触发升档；但传感器读数与 `nvidia-smi` 同步，重负载时脚本会接住。
 
 ### 实测档位（仅 T14 Gen 1，其他机型请先自测）
 

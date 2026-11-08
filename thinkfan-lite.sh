@@ -18,7 +18,9 @@ find_hwmon() {
 }
 
 CORE=$(find_hwmon coretemp) || { echo "coretemp hwmon not found" >&2; exit 1; }
-TEMP="$CORE/temp1_input"
+TP=$(find_hwmon thinkpad) || { echo "thinkpad hwmon not found" >&2; exit 1; }
+TEMP_CPU="$CORE/temp1_input"
+TEMP_GPU="$TP/temp2_input"
 
 # 实测：1=2868, 2=3293, 3=3405, 4=3512, 5=4518, 6=4987, 7=4970 RPM
 # 2/3/4 几乎一样，6/7 饱和，所以只用 1/2/5/6/7。
@@ -27,12 +29,15 @@ declare -A OFF=( [1]=44 [2]=52 [5]=64 [6]=76 [7]=84 )
 
 current=auto
 down_count=0
+t=0
+t_cpu=0
+t_gpu_display='--'
 log() { logger -t thinkfan-lite "$*"; }
 
 set_level() {
   local lvl=$1
   if printf 'level %s\n' "$lvl" > "$FAN" 2>/dev/null; then
-    [ "$lvl" != "$current" ] && log "temp=${t}C -> level $lvl"
+    [ "$lvl" != "$current" ] && log "temp=${t}C (cpu=${t_cpu}C gpu=${t_gpu_display}C) -> level $lvl"
     current=$lvl
   else
     log "failed to set level $lvl"
@@ -55,12 +60,23 @@ fi
 printf 'level auto\n' > "$FAN" 2>/dev/null || true
 
 while sleep "$INTERVAL"; do
-  raw=$(cat "$TEMP" 2>/dev/null) || {
+  raw_cpu=$(cat "$TEMP_CPU" 2>/dev/null) || {
     printf 'level auto\n' > "$FAN" 2>/dev/null || true
     current=auto
     continue
   }
-  t=$((raw / 1000))
+  t_cpu=$((raw_cpu / 1000))
+  raw_gpu=$(cat "$TEMP_GPU" 2>/dev/null) || raw_gpu=0
+  t_gpu=$((raw_gpu / 1000))
+
+  # 独显关闭/读数无效时忽略；否则取 CPU 与独显的较大值。
+  if [ "$t_gpu" -le 0 ] || [ "$t_gpu" -ge 150 ]; then
+    t_gpu_display='--'
+    t=$t_cpu
+  else
+    t_gpu_display="$t_gpu"
+    if [ "$t_gpu" -gt "$t_cpu" ]; then t=$t_gpu; else t=$t_cpu; fi
+  fi
 
   if [ "$t" -ge "$FAILSAFE" ]; then
     set_level 7

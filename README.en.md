@@ -36,7 +36,16 @@ After spin-up the fan reaches 4600 RPM and brings 97°C down to 82°C, so the pr
 
 ## Approach
 
-Enable manual fan control in `thinkpad_acpi` and use a small systemd daemon to write fan levels to `/proc/acpi/ibm/fan` based on `coretemp`.
+Enable manual fan control in `thinkpad_acpi` and use a small systemd daemon to write fan levels to `/proc/acpi/ibm/fan` based on **the higher of the CPU package and dGPU temperatures**.
+
+### Dual GPU handling
+
+- **iGPU**: shares the CPU die, so `coretemp/temp1_input` already covers it.
+- **dGPU**: uses the EC sensor at `thinkpad/temp2_input` (measured to match `nvidia-smi` exactly).
+- The script uses `max(cpu, gpu)`, so the fan ramps for whichever is hotter.
+- On machines without a dGPU, or when the dGPU is off, `temp2` reads 0/invalid and is ignored.
+
+Under a light `glxgears` load this low-power dGPU only reached 49°C and did not trigger a ramp; the sensor still matched `nvidia-smi`, so a heavier load will be covered.
 
 ### Measured levels (T14 Gen 1 only; measure your own machine first)
 
