@@ -1,0 +1,15 @@
+[Unit]
+Description=ThinkPad manual fan curve (thinkfan-lite)
+After=multi-user.target
+ConditionPathExists=/proc/acpi/ibm/fan
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/thinkfan-lite.sh
+ExecStop=/bin/sh -c 'echo "level auto" > /proc/acpi/ibm/fan'
+Restart=always
+RestartSec=2
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target
