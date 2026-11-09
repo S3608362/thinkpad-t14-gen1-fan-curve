@@ -60,6 +60,19 @@ sudo ./check-compat.sh
 
 如果 `level 5` 明显高于 `level 1`，说明这台机器支持手动档位，可以继续；否则不要用。脚本会自动恢复 `level auto`。
 
+### 手动档位无效时
+
+`level 1` 和 `level 5` 没有区别，说明 EC 忽略手动档位，**不要安装本脚本**。这不等于无解，可以按顺序尝试：
+
+1. **平台性能模式**（粗调，只有三档，没有温度曲线）
+   ```bash
+   cat /sys/firmware/acpi/platform_profile_choices
+   echo performance | sudo tee /sys/firmware/acpi/platform_profile
+   ```
+   切到 `performance` 会强制 EC 重新计算风扇策略，高温时往往能让风扇提前启动。只有存在 `/sys/firmware/acpi/platform_profile` 时才有用。
+2. **全速档**（仅应急，部分机型支持，噪声很大）：`echo "level full-speed" | sudo tee /proc/acpi/ibm/fan`。脚本本身不会使用这一档。
+3. 仍不行时：`thinkfan` 在 ThinkPad 上也走 `/proc/acpi/ibm/fan`，档位无效时帮不上；可考虑 `nbfc-linux` 或对应机型的 EC 专用工具。
+
 ## 安装
 
 ### 1. 打开 fan_control

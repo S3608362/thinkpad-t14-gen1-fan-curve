@@ -98,4 +98,21 @@ if [ "$l5" -gt "$l1" ]; then
 else
   echo
   echo "结果：level 1 和 level 5 没有明显差异；这台机器的 EC 可能忽略手动档位。"
+  echo
+  echo "不要安装本脚本。可以按顺序尝试以下替代方案："
+  echo
+  if [ -e /sys/firmware/acpi/platform_profile ]; then
+    echo "1) 平台性能模式（粗调，只有三档，没有温度曲线）"
+    echo "   可选：$(cat /sys/firmware/acpi/platform_profile_choices 2>/dev/null)"
+    echo "   高温时切到 performance，强制 EC 重算风扇策略："
+    echo "     echo performance | sudo tee /sys/firmware/acpi/platform_profile"
+  else
+    echo "1) 平台性能模式：本机没有 /sys/firmware/acpi/platform_profile，跳过。"
+  fi
+  echo
+  echo "2) 全速档（仅应急，部分机型支持，噪声很大）："
+  echo "     echo \"level full-speed\" | sudo tee $FAN"
+  echo
+  echo "3) 仍不行：thinkfan 在 ThinkPad 上也走 $FAN，档位无效时帮不上；"
+  echo "   可考虑 nbfc-linux 或对应机型的 EC 专用工具。"
 fi

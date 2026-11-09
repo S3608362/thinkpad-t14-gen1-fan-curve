@@ -60,6 +60,19 @@ It checks:
 
 If `level 5` is clearly higher than `level 1`, manual levels work and you can continue. Otherwise, do not use this. The script restores `level auto` automatically.
 
+### If manual levels do not work
+
+If `level 1` and `level 5` produce the same RPM, the EC ignores manual levels — **do not install this script**. That does not mean the fan is uncontrollable. Try, in order:
+
+1. **Platform performance profile** (coarse, three modes only, no temperature curve)
+   ```bash
+   cat /sys/firmware/acpi/platform_profile_choices
+   echo performance | sudo tee /sys/firmware/acpi/platform_profile
+   ```
+   Switching to `performance` forces the EC to re-evaluate its fan policy and often starts the fan earlier when hot. This only works if `/sys/firmware/acpi/platform_profile` exists.
+2. **Full-speed level** (emergency only, model-dependent, very loud): `echo "level full-speed" | sudo tee /proc/acpi/ibm/fan`. The daemon never uses this level.
+3. If neither helps, note that `thinkfan` also goes through `/proc/acpi/ibm/fan` on ThinkPads and will not help when levels are ignored; consider `nbfc-linux` or a model-specific EC tool.
+
 ## Installation
 
 ### 1. Enable fan_control
