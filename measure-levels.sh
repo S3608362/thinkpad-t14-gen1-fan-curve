@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 S3608362
 # measure-levels.sh — 实测 ThinkPad 风扇 level 1–7 对应转速
 set -u
 

@@ -35,6 +35,14 @@
 
 > 读数提示：`auto` 降速会经过 ~2300 RPM，这是过渡值不是 level 1；风扇启动瞬间可能读到 65535 RPM，是 tach 溢出，忽略即可。
 
+## 对比 thinkfan
+
+- **直接写 EC 档位**：用 `/proc/acpi/ibm/fan` 的 level 1–7；thinkfan 常见路径是 hwmon PWM 0–255，ThinkPad 上还要确认 EC 是否接受 PWM。
+- **更适合温度跃变**：EMA 快升慢降 + 2 秒/4 秒大跃变快速升档；thinkfan 是静态分段曲线。
+- **零依赖**：一个 bash 脚本 + 一个 systemd 单元，不需要装包或 YAML。
+- **保护写死**：watchdog、90°C fail-safe、退出恢复 `auto` 都在脚本里，方便审计。
+- **自动找传感器**：`coretemp` / `k10temp` / `GPU` 标签自动识别。
+
 ## 先跑 check-compat.sh
 
 **任何 ThinkPad 在安装服务之前，先跑：**
@@ -121,8 +129,9 @@ sudo reboot
 - `thinkfan-lite.service`：systemd 单元
 - `measure-levels.sh`：实测 level→RPM
 - `check-compat.sh`：兼容性检查
+- `NOTICE`：GPL-2.0-or-later 声明
 - `README.en.md`：英文版
 
 ## License
 
-MIT
+GPL-2.0-or-later. See `LICENSE` and `NOTICE`.

@@ -35,6 +35,14 @@ Measured on a T14 Gen 1 with an 8-thread synthetic load; for reference only.
 
 > Reading note: during `auto` spin-down the tach passes through ~2300 RPM; that is a transient, not level 1. Some tools briefly report 65535 RPM when the fan starts — a tach overflow, ignore it.
 
+## Compared to thinkfan
+
+- **Writes EC levels directly**: uses `/proc/acpi/ibm/fan` level 1–7; thinkfan commonly goes through hwmon PWM 0–255, and on ThinkPads you still have to verify that the EC accepts PWM.
+- **Better for temperature spikes**: fast-attack/slow-decay EMA plus a 2 s / 4 s large-step fast path; thinkfan uses static bands.
+- **Zero dependencies**: one bash script and one systemd unit; no package or YAML.
+- **Explicit safety**: watchdog, 90°C fail-safe, and `auto` on exit are all in the script and easy to audit.
+- **Automatic sensor discovery**: finds `coretemp` / `k10temp` / the `GPU` label.
+
 ## Run check-compat.sh first
 
 **On any ThinkPad, run this before installing the service:**
@@ -121,8 +129,9 @@ sudo reboot
 - `thinkfan-lite.service` — systemd unit.
 - `measure-levels.sh` — measure level-to-RPM.
 - `check-compat.sh` — compatibility check.
+- `NOTICE` — GPL-2.0-or-later notice.
 - `README.md` — Chinese version.
 
 ## License
 
-MIT
+GPL-2.0-or-later. See `LICENSE` and `NOTICE`.

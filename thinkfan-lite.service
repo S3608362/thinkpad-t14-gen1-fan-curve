@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 [Unit]
 Description=ThinkPad manual fan curve (thinkfan-lite)
 After=multi-user.target

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 S3608362
 # /usr/local/sbin/thinkfan-lite.sh
 # ThinkPad 手动风扇曲线：EMA 平滑 + 大跃变快速响应 + 档位滞后 + watchdog + fail-safe
 set -u

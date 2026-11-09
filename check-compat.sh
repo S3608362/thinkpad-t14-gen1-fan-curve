@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2026 S3608362
 # check-compat.sh — 快速检查这台 ThinkPad 是否支持手动风扇档位
 set -u
 
