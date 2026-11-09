@@ -171,6 +171,14 @@ sudo update-initramfs -u
 sudo reboot
 ```
 
+## 休眠/睡眠
+
+- systemd 服务不会在 suspend 时停止；进程被冻结，恢复后继续。
+- suspend 期间脚本停止喂 watchdog，10 秒后 EC 接管；实测会回到 `auto`，不会锁死在手动档。
+- 恢复后脚本检测到时间跳变（>15 秒），会重置 EMA、重新 arm watchdog，并按当前温度重新控制。
+- 每 60 秒重新写一次 `watchdog 10`，防止 EC 在 resume 后清掉 watchdog。
+- 不需要额外的 systemd sleep hook。
+
 ## 系统/驱动升级后
 
 - **内核升级**：`/etc/modprobe.d/thinkpad_acpi.conf` 和 systemd 服务会保留。重启后确认 `fan_control=Y`，再看 `journalctl -t thinkfan-lite` 里的传感器路径。

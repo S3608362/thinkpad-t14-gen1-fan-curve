@@ -171,6 +171,14 @@ sudo update-initramfs -u
 sudo reboot
 ```
 
+## Suspend / resume
+
+- The systemd service is not stopped on suspend; the process is frozen and resumes afterwards.
+- While suspended the script stops petting the watchdog; after 10 s the EC takes over (tested to return to `auto`, not stuck at a manual level).
+- On resume the script detects the time jump (>15 s), resets the EMA, re-arms the watchdog, and resumes temperature-based control.
+- It re-arms `watchdog 10` every 60 s in case the EC clears it across resume.
+- No extra systemd sleep hook is required.
+
 ## After system or driver upgrades
 
 - **Kernel upgrade**: `/etc/modprobe.d/thinkpad_acpi.conf` and the systemd unit persist. After reboot, verify `fan_control=Y` and check the sensor paths in `journalctl -t thinkfan-lite`.

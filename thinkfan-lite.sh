@@ -11,6 +11,8 @@ FAST_DELTA=10
 FAST_DELTA_4S=15
 EMA_UP_DIV=2
 EMA_DOWN_DIV=4
+RESUME_GAP=15
+WATCHDOG_REARM=30
 
 find_hwmon() {
   local d
@@ -61,6 +63,8 @@ t_prev2=0
 t_cpu=0
 t_gpu_display='--'
 first=1
+last_time=$(date +%s)
+rearm_count=0
 log() { logger -t thinkfan-lite "$*"; }
 log "sensors: cpu=$TEMP_CPU gpu=$TEMP_GPU"
 if [ ! -r "$TEMP_GPU" ]; then
@@ -122,7 +126,23 @@ while sleep "$INTERVAL"; do
   fi
   t_raw=$t
 
-  if [ "$first" -eq 1 ]; then
+  now=$(date +%s)
+  gap=$((now - last_time))
+  last_time=$now
+
+  if [ "$gap" -gt "$RESUME_GAP" ]; then
+    # 从 suspend 恢复或长时间卡顿：丢弃旧滤波，立即按当前温度控制。
+    t_filt=$t_raw
+    t_prev=$t_raw
+    t_prev2=$t_raw
+    first=0
+    down_count=0
+    delta=0
+    delta4=0
+    rearm_count=0
+    printf 'watchdog 10\n' > "$FAN" 2>/dev/null || true
+    log "resume/stall detected (${gap}s), filter reset"
+  elif [ "$first" -eq 1 ]; then
     t_filt=$t_raw
     t_prev=$t_raw
     t_prev2=$t_raw
@@ -203,4 +223,11 @@ while sleep "$INTERVAL"; do
 
   # 喂 watchdog：档位不变也要周期性写入
   [ "$current" != auto ] && printf 'level %s\n' "$current" > "$FAN" 2>/dev/null || true
+
+  # 定期重新 arm watchdog，防止 EC 在 suspend/resume 后清掉它
+  rearm_count=$((rearm_count + 1))
+  if [ "$rearm_count" -ge "$WATCHDOG_REARM" ]; then
+    printf 'watchdog 10\n' > "$FAN" 2>/dev/null || true
+    rearm_count=0
+  fi
 done
