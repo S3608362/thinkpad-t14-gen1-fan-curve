@@ -16,7 +16,7 @@ find_hwmon() {
   return 1
 }
 
-CORE=$(find_hwmon coretemp) || { echo "找不到 coretemp hwmon" >&2; exit 1; }
+CORE=$(find_hwmon coretemp) || CORE=$(find_hwmon k10temp) || { echo "找不到 coretemp/k10temp hwmon" >&2; exit 1; }
 TP=$(find_hwmon thinkpad) || { echo "找不到 thinkpad hwmon" >&2; exit 1; }
 TEMP="$CORE/temp1_input"
 RPM="$TP/fan1_input"

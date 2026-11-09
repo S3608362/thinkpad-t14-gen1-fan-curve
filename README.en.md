@@ -74,16 +74,17 @@ Levels 2/3/4 are nearly identical, and 6/7 are saturated, so the script only use
 | 80–87°C | level 6 |
 | ≥ 88°C | level 7 (90°C fail-safe) |
 
-- Upshifts happen immediately.
-- Downshifts require 3 consecutive samples (6 s) below the hysteresis threshold, to avoid fan flapping from coretemp noise.
-- Hysteresis: 4°C.
+- Small fluctuations: fast-attack/slow-decay EMA (50% on rise, 25% on fall, 2 s sampling) so 1–2°C jitter does not change the level.
+- Large steps: a 2 s rise of ≥10°C or a 4 s rise of ≥15°C bypasses the average and upshifts immediately from the raw temperature.
+- Downshifts: require 5 consecutive samples (10 s) below the hysteresis threshold, one level at a time.
+- Hysteresis: 4°C for level 1, 6°C for the other levels.
 
 ### Before / after
 
 | Metric | Before | After |
 |---|---|---|
-| Fan spin-up temperature | 93–97°C | 46°C |
-| Spin-up delay | 28–37 s | script responds within 2 s; physical ramp 8–12 s |
+| Fan spin-up temperature | 93–97°C | ~48°C (gradual); fast ramp on large steps |
+| Spin-up delay | 28–37 s | 2 s sampling; 2 s fast path; physical ramp 8–12 s |
 | Peak package temperature | 97°C | 90°C |
 | Steady state under load | 80–85°C | 78–79°C @ level 5 (~4550 RPM) |
 
@@ -192,7 +193,7 @@ Must be verified per machine:
 
 - **level-to-RPM mapping**: completely different across models/BIOS/EC; run `measure-levels.sh` first;
 - **whether the EC accepts manual levels**: on some models the RPM does not change at all;
-- **CPU sensor**: Intel uses `coretemp` / `Package id 0`; AMD uses `k10temp` and the script must be adapted;
+- **CPU sensor**: Intel uses `coretemp` / `Package id 0`; AMD uses `k10temp` (supported; prefers `Tdie`, then `Tctl`; `Tctl` may include an offset);
 - **GPU sensor**: the `GPU` label on `thinkpad/temp2_input` only exists on dGPU models; without it the script falls back to CPU;
 - **number of fans**: dual-fan models (P series, X1 Extreme, etc.) may need `fan1` / `fan2` handling;
 - **temperature thresholds**: 48/56/68/80/88 are only a starting point for this T14 Gen 1.
