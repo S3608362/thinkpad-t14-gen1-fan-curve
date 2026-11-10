@@ -125,6 +125,7 @@ journalctl -t thinkfan-lite -f
   of scope for this script. If your dGPU sits at 57°C under load, verify this before
   blaming the cooling. Note: once unlocked, the EC may keep the setting persistently;
   no reliable rollback method has been verified.
+- **Slow despite low temperatures**: it may be the EC lap mode (`dytc_lapmode=1`). The optional `extras/lapmode-notify/` component sends a desktop notification on state changes.
 - Do not use `level 0`, `disengaged`, or `full-speed`; the script never does.
 - Manual mode bypasses the EC auto curve. The script has watchdog/fail-safe, but read it before installing.
 - After a BIOS/EC update, re-run `measure-levels.sh`; kernel/NVIDIA driver updates normally do not matter.

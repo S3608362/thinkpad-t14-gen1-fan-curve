@@ -1,0 +1,14 @@
+[Unit]
+Description=ThinkPad lap mode notification
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/lapmode-notify.sh
+Restart=always
+RestartSec=5
+Nice=19
+
+[Install]
+WantedBy=graphical-session.target
