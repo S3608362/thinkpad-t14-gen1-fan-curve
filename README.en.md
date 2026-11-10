@@ -117,6 +117,12 @@ journalctl -t thinkfan-lite -f
 
 ## Notes
 
+- **The dGPU 57°C cap is not a cooling problem**: on some models (e.g. the MX330 in
+  the T14 Gen 1) the firmware sets `GPU Target Temperature` to 57°C; the GPU drops to
+  139 MHz as soon as it reaches that, and no fan speed will help. Check it with
+  `nvidia-smi -q -d TEMPERATURE`; lifting it requires the ACPI `_Q6D` call and is out
+  of scope for this script. If your dGPU sits at 57°C under load, verify this before
+  blaming the cooling.
 - Do not use `level 0`, `disengaged`, or `full-speed`; the script never does.
 - Manual mode bypasses the EC auto curve. The script has watchdog/fail-safe, but read it before installing.
 - After a BIOS/EC update, re-run `measure-levels.sh`; kernel/NVIDIA driver updates normally do not matter.

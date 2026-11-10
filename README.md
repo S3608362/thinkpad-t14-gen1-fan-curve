@@ -117,6 +117,10 @@ journalctl -t thinkfan-lite -f
 
 ## 注意
 
+- **独显的 57°C 上限不是散热问题**：部分机型（如 T14 Gen 1 的 MX330）固件把
+  `GPU Target Temperature` 设在 57°C，一碰就掉到 139MHz，风扇转得再快也没用。
+  用 `nvidia-smi -q -d TEMPERATURE` 可以看到这个值；解除它需要 ACPI `_Q6D`，
+  超出本脚本范围。GPU 满载卡在 57°C 时先确认这一点，不要误判成散热不足。
 - 不要用 `level 0`、`disengaged`、`full-speed`；脚本本身也不会用。
 - 手动模式会绕过 EC 自动曲线；脚本已有 watchdog/fail-safe，但仍建议先读一遍脚本。
 - BIOS/EC 升级后重跑 `measure-levels.sh`；内核/NVIDIA 驱动升级通常不影响。
