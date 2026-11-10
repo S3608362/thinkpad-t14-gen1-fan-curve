@@ -1,7 +1,8 @@
 # ThinkPad T14 Gen 1 风扇曲线
 
-> 一个给 ThinkPad T14 Gen 1（Intel）用的轻量风扇守护脚本。  
-> 解决 Linux 下 EC 风扇起转太晚、CPU 已经 90°C+ 风扇还不转的问题。
+> 一个给 ThinkPad T14 Gen 1（Intel / AMD）用的轻量风扇守护脚本。  
+> 解决 Linux 下 EC 风扇起转太晚、CPU 已经 90°C+ 风扇还不转的问题。  
+> AMD 传感器已支持（`k10temp`），但档位映射与阈值尚未实测，需自行验证。
 
 > [!WARNING]
 > **不要轻信 fork 仓库。** 只以本仓库（`S3608362/thinkpad-t14-gen1-fan-curve`）的代码为准。fork 可能被修改并加入恶意代码；如果你从 fork 安装，请先逐行审查脚本。本项目没有 `curl | bash` 安装方式。
@@ -9,7 +10,7 @@
 ## 问题
 
 - EC 用自身传感器控制风扇，负载突变时比核心温度慢 6–10 秒；
-- Linux 没有 Fan cooling device，`thermald` 又因 `dytc_lapmode` 拒绝运行；
+- Linux 没有 Fan cooling device；Intel 机型上 `thermald` 又因 `dytc_lapmode` 拒绝运行；
 - 结果：8 线程满载时风扇 0 RPM 撑到 93–97°C 才起转。
 
 脚本直接读 `coretemp` + 独显传感器，按温度写 `/proc/acpi/ibm/fan`，把这段控制补回来。

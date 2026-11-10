@@ -1,7 +1,8 @@
 # ThinkPad T14 Gen 1 Fan Curve
 
-> A small fan daemon for the ThinkPad T14 Gen 1 (Intel).  
-> It fixes the Linux-specific problem where the EC fan starts far too late and the CPU is already at 90°C+.
+> A small fan daemon for the ThinkPad T14 Gen 1 (Intel / AMD).  
+> It fixes the Linux-specific problem where the EC fan starts far too late and the CPU is already at 90°C+.  
+> AMD sensors are supported (`k10temp`), but the level mapping and thresholds are untested; verify them yourself.
 
 > [!WARNING]
 > **Do not trust forks.** Use only the code in this repository (`S3608362/thinkpad-t14-gen1-fan-curve`). Forks can be modified to include malicious code; review the script line by line before installing. This project has no `curl | bash` installer.
@@ -9,7 +10,7 @@
 ## The problem
 
 - The EC controls the fan from its own sensor, which lags the core temperature by 6–10 seconds during load transients.
-- Linux exposes no Fan cooling device, and `thermald` refuses to run because of `dytc_lapmode`.
+- Linux exposes no Fan cooling device; on Intel models, `thermald` refuses to run because of `dytc_lapmode`.
 - Result: under an 8-thread load, the fan stays at 0 RPM until the package reaches 93–97°C.
 
 The script reads `coretemp` plus the dGPU sensor and writes fan levels to `/proc/acpi/ibm/fan`, filling that control gap.
